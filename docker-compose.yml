@@ -1,0 +1,55 @@
+version: "3.7"
+services:
+  mysql_db:
+    image: mysql
+    restart: always
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_DATABASE: course4_user-serv_db
+      MYSQL_USER: course4_dev
+      MYSQL_PASSWORD: nE5kMc7JCGNqwDQM
+      MYSQL_ROOT_PASSWORD: nE5kMc7JCGNqwDQN
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+  mysql_db_2:
+    image: mysql
+    restart: always
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_DATABASE: course4_course-serv_db
+      MYSQL_USER: course4_dev
+      MYSQL_PASSWORD: nE5kMc7JCGNqwDQM
+      MYSQL_ROOT_PASSWORD: nE5kMc7JCGNqwDQN
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+  eureka-serv:
+    build: ./eureka-serv
+    restart: always
+    ports:
+      - 8761:8761
+  gateway-serv:
+      build: ./gateway-serv
+      restart: always
+      ports:
+        - 8765:8765
+  user-serv:
+    build: ./user-serv
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      - mysql_db
+      - eureka-serv
+    command: sh -c './wait-for mysql_db:3306 -- npm start'
+  course-serv:
+    build: ./course-serv
+    restart: always
+    ports:
+      - 8001:8001
+    depends_on:
+      - mysql_db_2
+      - eureka-serv
+      - user-serv
+    command: sh -c './wait-for mysql_db:3306 -- npm start'

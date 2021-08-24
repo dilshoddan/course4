@@ -1,0 +1,4 @@
+include ':eureka-serv'
+include ':gateway-serv'
+include ':user-serv'
+include ':course-serv'
